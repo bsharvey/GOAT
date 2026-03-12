@@ -78,6 +78,88 @@ program
     }
   });
 
+// Agent command
+program
+  .command("agent")
+  .description("Execute an autonomous agent task")
+  .argument("<type>", "Agent type: royalty-tracker, content-advisor, contract-analyst, marketing")
+  .argument("<prompt...>", "Task prompt")
+  .action(async (type: string, promptParts: string[]) => {
+    const prompt = promptParts.join(" ");
+    const spinner = ora(`Running ${type} agent...`).start();
+
+    try {
+      const res = await fetch("http://localhost:5001/api/agents/execute", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ agentType: type, prompt }),
+      });
+      const data = await res.json() as { success: boolean; result?: string; error?: string };
+      spinner.stop();
+      if (data.success) {
+        console.log(chalk.yellow(`\n[${type}]: ${data.result}\n`));
+      } else {
+        console.log(chalk.red(`Error: ${data.error}`));
+      }
+    } catch (err) {
+      spinner.fail(chalk.red(err instanceof Error ? err.message : "Request failed"));
+    }
+  });
+
+// Data stats command
+program
+  .command("stats")
+  .description("Show royalty dashboard stats")
+  .action(async () => {
+    const spinner = ora("Fetching stats...").start();
+    try {
+      const res = await fetch("http://localhost:5001/api/data/stats");
+      const data = await res.json() as Record<string, number>;
+      spinner.stop();
+      console.log(chalk.yellow.bold("\nGOAT Royalty Stats:\n"));
+      console.log(`  Total Revenue:       ${chalk.green("$" + (data.totalCombinedRevenue ?? 0).toFixed(2))}`);
+      console.log(`  Mechanical (MLC):    ${chalk.yellow("$" + (data.totalMechanicalRoyalties ?? 0).toFixed(2))}`);
+      console.log(`  SoundExchange:       ${chalk.yellow("$" + (data.totalSoundExchangeRevenue ?? 0).toFixed(2))}`);
+      console.log(`  Total Plays:         ${chalk.white((data.totalPlays ?? 0).toLocaleString())}`);
+      console.log(`  Artists:             ${chalk.white(data.uniqueArtists ?? 0)}`);
+      console.log(`  MLC Records:         ${chalk.white(data.mlcRecords ?? 0)}`);
+      console.log(`  SX Records:          ${chalk.white(data.soundExchangeRecords ?? 0)}`);
+      console.log(`  Bass Tracks:         ${chalk.white(data.superBassTracks ?? 0)}`);
+      console.log();
+    } catch {
+      spinner.fail(chalk.red("API not reachable"));
+    }
+  });
+
+// Activate command
+program
+  .command("activate")
+  .description("Speak the activation phrase")
+  .argument("<phrase...>", "The activation phrase")
+  .action(async (phraseParts: string[]) => {
+    const message = phraseParts.join(" ");
+    const spinner = ora("Sending activation...").start();
+    try {
+      const res = await fetch("http://localhost:5001/api/activate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ message }),
+      });
+      const data = await res.json() as { success: boolean; message: string; commander?: string; token?: string };
+      spinner.stop();
+      if (data.commander) {
+        console.log(chalk.yellow.bold(`\n${data.message}`));
+        console.log(chalk.green(`Commander: ${data.commander}`));
+        if (data.token) console.log(chalk.gray(`Token: ${data.token}`));
+      } else {
+        console.log(chalk.gray(`\n${data.message}`));
+      }
+      console.log();
+    } catch {
+      spinner.fail(chalk.red("API not reachable"));
+    }
+  });
+
 function isAvailable(provider: string): boolean {
   switch (provider) {
     case "anthropic":
@@ -136,7 +218,7 @@ async function callOllama(message: string): Promise<string> {
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ model: "llama3", prompt: message, stream: false }),
   });
-  const data = await res.json();
+  const data = await res.json() as { response?: string };
   return data.response || "[No response from Ollama]";
 }
 

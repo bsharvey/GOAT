@@ -77,6 +77,48 @@ export const MODEL_REGISTRY: Record<string, LLMModel> = {
     maxTokens: 4096,
   },
 
+  // NVIDIA NIM
+  "llama2-70b": {
+    id: "meta/llama2-70b",
+    provider: "nvidia",
+    name: "Llama 2 70B (NIM)",
+    capabilities: ["general", "analysis"],
+    costMultiplier: 0.5,
+    maxTokens: 4096,
+  },
+  "mixtral-8x7b": {
+    id: "mistralai/mixtral-8x7b-instruct-v0.1",
+    provider: "nvidia",
+    name: "Mixtral 8x7B (NIM)",
+    capabilities: ["general", "fast"],
+    costMultiplier: 0.3,
+    maxTokens: 4096,
+  },
+  "nemotron-70b": {
+    id: "nvidia/nemotron-4-340b-instruct",
+    provider: "nvidia",
+    name: "Nemotron 70B (NIM)",
+    capabilities: ["complex", "analysis", "reasoning"],
+    costMultiplier: 0.8,
+    maxTokens: 4096,
+  },
+  "codellama-34b": {
+    id: "meta/codellama-34b",
+    provider: "nvidia",
+    name: "CodeLlama 34B (NIM)",
+    capabilities: ["code", "fast"],
+    costMultiplier: 0.3,
+    maxTokens: 4096,
+  },
+  "starcoder2": {
+    id: "bigcode/starcoder2-15b",
+    provider: "nvidia",
+    name: "StarCoder2 15B (NIM)",
+    capabilities: ["code"],
+    costMultiplier: 0.2,
+    maxTokens: 4096,
+  },
+
   // Local (Ollama)
   "llama3-70b": {
     id: "llama3:70b",

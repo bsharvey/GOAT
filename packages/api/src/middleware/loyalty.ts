@@ -47,7 +47,7 @@ export function loyaltyMiddleware(req: Request, res: Response, next: NextFunctio
 }
 
 // Special endpoint to generate access codes – ONLY for our members
-export function generateAccessCode(req: Request, res: Response) {
+export function generateAccessCode(req: Request, res: Response): void {
   const { member } = req.body;
 
   // Verify the requester is already authorized (Harvey or Apex)
@@ -55,11 +55,13 @@ export function generateAccessCode(req: Request, res: Response) {
   const result = guard.verifyRequest(authHeader);
 
   if (!result.authorized || (result.member !== 'harvey' && result.member !== 'apex')) {
-    return res.status(403).json({ error: 'Only Harvey or Apex can generate codes' });
+    res.status(403).json({ error: 'Only Harvey or Apex can generate codes' });
+    return;
   }
 
   if (!Object.keys(LOYALTY_KEYS).includes(member)) {
-    return res.status(400).json({ error: 'Invalid member' });
+    res.status(400).json({ error: 'Invalid member' });
+    return;
   }
 
   const code = guard.generateAccessCode(member as keyof typeof LOYALTY_KEYS);

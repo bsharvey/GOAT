@@ -3,6 +3,7 @@ import OpenAI from "openai";
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import { MODEL_REGISTRY, LoyaltyGuard, activation } from "@goat/core";
 import type { LLMProvider } from "@goat/core";
+import { ragService } from "./rag.js";
 
 /**
  * OmniLLM Service — Intelligent multi-model router
@@ -68,6 +69,8 @@ export class OmniLLMService {
         return !!this.openai;
       case "google":
         return !!this.gemini;
+      case "nvidia":
+        return !!process.env.NVIDIA_API_KEY;
       default:
         return false;
     }
@@ -92,7 +95,17 @@ export class OmniLLMService {
 
     const needs = this.analyzeQuery(query);
     const modelKey = this.selectModel(needs);
-    return this.callModel(modelKey, query);
+
+    // Enrich royalty queries with RAG context
+    let enrichedQuery = query;
+    if (needs.needsRoyalty) {
+      const ragContext = ragService.buildContext(query);
+      if (ragContext) {
+        enrichedQuery = `${ragContext}User question: ${query}`;
+      }
+    }
+
+    return this.callModel(modelKey, enrichedQuery);
   }
 
   private analyzeQuery(query: string) {
@@ -130,6 +143,8 @@ export class OmniLLMService {
         return this.callOpenAI(model.id, query);
       case "google":
         return this.callGemini(model.id, query);
+      case "nvidia":
+        return this.callNvidia(model.id, query);
       default:
         throw new Error(`Provider ${model.provider} not yet implemented`);
     }
@@ -167,6 +182,32 @@ export class OmniLLMService {
     const model = this.gemini.getGenerativeModel({ model: modelId });
     const result = await model.generateContent(query);
     return result.response.text();
+  }
+
+  private async callNvidia(modelId: string, query: string): Promise<string> {
+    const apiKey = process.env.NVIDIA_API_KEY;
+    if (!apiKey) throw new Error("NVIDIA API key not configured");
+
+    const response = await fetch("https://integrate.api.nvidia.com/v1/chat/completions", {
+      method: "POST",
+      headers: {
+        "Authorization": `Bearer ${apiKey}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        model: modelId,
+        messages: [{ role: "user", content: query }],
+        max_tokens: 2048,
+        temperature: 0.7,
+      }),
+    });
+
+    if (!response.ok) {
+      throw new Error(`NVIDIA NIM error: ${response.status}`);
+    }
+
+    const data = await response.json() as { choices: Array<{ message: { content: string } }> };
+    return data.choices[0]?.message?.content || "[No response]";
   }
 
   /**

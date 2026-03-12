@@ -67,7 +67,7 @@ export class ActivationProtocol {
 
     // Emit activation event (if we have event system)
     if (typeof process !== 'undefined' && process.emit) {
-      process.emit('goat:activated' as any, { commander, timestamp: this.activationTimestamp });
+      (process.emit as Function)('goat:activated', { commander, timestamp: this.activationTimestamp });
     }
   }
 

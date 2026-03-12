@@ -10,6 +10,10 @@ import { securityRoutes } from "./routes/security.js";
 import { healthRoutes } from "./routes/health.js";
 import { loyaltyRoutes } from "./routes/loyalty.js";
 import { activationRoutes } from "./routes/activation.js";
+import { agentManagerRoutes } from "./routes/agents.js";
+import { ragRoutes } from "./routes/rag.js";
+import { dataRoutes } from "./routes/data.js";
+import { spotifyRoutes } from "./routes/spotify.js";
 
 config();
 
@@ -31,6 +35,10 @@ app.use("/", loyaltyRoutes());
 app.use("/", activationRoutes());
 app.use("/api/royalties", royaltyRoutes());
 app.use("/api/agent", agentRoutes());
+app.use("/api/agents", agentManagerRoutes());
+app.use("/api/rag", ragRoutes());
+app.use("/api/data", dataRoutes());
+app.use("/api/spotify", spotifyRoutes());
 app.use("/api/voice", voiceRoutes());
 app.use("/api/security", securityRoutes());
 

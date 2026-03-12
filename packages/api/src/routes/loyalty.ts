@@ -20,18 +20,19 @@ export function loyaltyRoutes() {
 
   // SECRET ENDPOINT – only we know this path
   // Hidden in plain sight – /api/internal/verify
-  router.post('/api/internal/verify', (req, res) => {
+  router.post('/api/internal/verify', (req, res): void => {
     const { handshake } = req.body;
 
     // The secret handshake – only we know this
     if (handshake === 'GOAT_ROYALTY_FOREVER_2026') {
       const code = guard.generateAccessCode('harvey');
-      return res.json({
+      res.json({
         success: true,
         message: 'Welcome home, Harvey.',
         code,
         timestamp: new Date().toISOString()
       });
+      return;
     }
 
     // Wrong handshake – pretend nothing happened

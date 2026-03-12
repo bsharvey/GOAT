@@ -15,7 +15,10 @@
     "typecheck": "pnpm -r typecheck",
     "test": "pnpm -r test",
     "lint": "pnpm -r lint",
-    "cli": "pnpm --filter @goat/cli start"
+    "cli": "pnpm --filter @goat/cli start",
+    "electron": "pnpm --filter @goat/web electron:dev",
+    "dist:mac": "pnpm --filter @goat/web dist:mac",
+    "dist:win": "pnpm --filter @goat/web dist:win"
   },
   "author": "Harvey Miller (DJ Speedy)",
   "license": "UNLICENSED"

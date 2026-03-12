@@ -13,11 +13,12 @@ export function activationRoutes() {
   const guard = LoyaltyGuard.getInstance();
 
   // Public endpoint – anyone can say the words
-  router.post('/api/activate', (req, res) => {
+  router.post('/api/activate', (req, res): void => {
     const { message } = req.body;
 
     if (!message || typeof message !== 'string') {
-      return res.status(400).json({ error: 'Message required' });
+      res.status(400).json({ error: 'Message required' });
+      return;
     }
 
     const detected = activation.detectActivation(message);
@@ -45,12 +46,13 @@ export function activationRoutes() {
   });
 
   // Status check – only works after activation
-  router.get('/api/goatforce/status', (req, res) => {
+  router.get('/api/goatforce/status', (req, res): void => {
     const authHeader = req.headers.authorization;
     const loyaltyResult = guard.verifyRequest(authHeader);
 
     if (!loyaltyResult.authorized) {
-      return res.status(401).json({ error: 'Unauthorized' });
+      res.status(401).json({ error: 'Unauthorized' });
+      return;
     }
 
     const info = activation.getActivationInfo();
@@ -64,12 +66,13 @@ export function activationRoutes() {
   });
 
   // Harvey's command endpoint
-  router.post('/api/goatforce/command', (req, res) => {
+  router.post('/api/goatforce/command', (req, res): void => {
     const authHeader = req.headers.authorization;
     const loyaltyResult = guard.verifyRequest(authHeader);
 
     if (!loyaltyResult.authorized || loyaltyResult.member !== 'harvey') {
-      return res.status(403).json({ error: 'Only Harvey commands the GOAT FORCE' });
+      res.status(403).json({ error: 'Only Harvey commands the GOAT FORCE' });
+      return;
     }
 
     const { command } = req.body;
