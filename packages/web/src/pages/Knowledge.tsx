@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { motion } from "framer-motion";
 import axios from "axios";
 
 const API = import.meta.env.VITE_API_URL || "";
@@ -46,90 +47,104 @@ export default function Knowledge() {
   };
 
   return (
-    <div className="max-w-5xl mx-auto space-y-6">
-      <div>
-        <h2 className="text-3xl font-bold text-goat-gold">Knowledge Base</h2>
-        <p className="text-yellow-200/70 mt-1">
-          RAG-powered knowledge system with music industry expertise.
+    <div className="space-y-8">
+      {/* Header */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+      >
+        <h2 className="text-3xl font-bangers tracking-wide text-goat-gold">Knowledge Base</h2>
+        <p className="text-yellow-200/50 text-sm mt-1">
+          Search and manage your music industry knowledge library
         </p>
-      </div>
+      </motion.div>
 
       {/* Stats */}
       <div className="grid grid-cols-3 gap-4">
-        <div className="bg-black/60 border border-yellow-900/50 rounded-lg p-4">
-          <p className="text-yellow-200/70 text-xs uppercase">Documents</p>
-          <p className="text-2xl font-bold text-goat-gold">{stats?.totalDocuments ?? 0}</p>
-        </div>
-        <div className="bg-black/60 border border-yellow-900/50 rounded-lg p-4">
-          <p className="text-yellow-200/70 text-xs uppercase">Cache</p>
-          <p className="text-2xl font-bold text-goat-gold">{stats?.cacheSize ?? 0}</p>
-        </div>
-        <div className="bg-black/60 border border-yellow-900/50 rounded-lg p-4">
-          <p className="text-yellow-200/70 text-xs uppercase">Topics</p>
-          <p className="text-2xl font-bold text-goat-gold">{stats?.topics?.length ?? 0}</p>
-        </div>
+        {[
+          { label: "Documents", value: stats?.totalDocuments ?? 0 },
+          { label: "Cached", value: stats?.cacheSize ?? 0 },
+          { label: "Topics", value: stats?.topics?.length ?? 0 },
+        ].map((stat, i) => (
+          <motion.div
+            key={stat.label}
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: i * 0.05 }}
+            className="bg-black/40 border border-yellow-900/40 rounded-xl p-4 card-glow"
+          >
+            <p className="text-yellow-200/50 text-xs uppercase tracking-wider">{stat.label}</p>
+            <p className="text-2xl font-bold text-goat-gold mt-1">{stat.value}</p>
+          </motion.div>
+        ))}
       </div>
 
       {/* Search */}
-      <div className="bg-black/60 border border-yellow-900/50 rounded-lg p-6">
-        <h3 className="text-lg font-bold text-goat-gold mb-3">Search Knowledge</h3>
-        <form onSubmit={handleSearch} className="flex gap-4">
+      <div className="bg-black/40 border border-yellow-900/40 rounded-xl p-6">
+        <h3 className="text-lg font-bold text-yellow-100 mb-4">Search Knowledge</h3>
+        <form onSubmit={handleSearch} className="flex gap-3">
           <input
             type="text"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            placeholder="Search royalty knowledge base..."
-            className="flex-1 bg-black/80 border border-yellow-900/50 rounded px-4 py-2 text-white placeholder:text-yellow-200/30 focus:outline-none focus:border-goat-gold"
+            placeholder="Search royalties, contracts, industry knowledge..."
+            className="flex-1 bg-black/50 border border-yellow-900/40 rounded-xl px-4 py-2.5 text-white placeholder:text-yellow-200/30 focus:outline-none focus:border-goat-gold focus:ring-1 focus:ring-goat-gold/20 transition"
           />
           <button
             type="submit"
             disabled={loading}
-            className="bg-goat-gold text-black font-bold px-6 py-2 rounded hover:bg-yellow-400 transition disabled:opacity-50"
+            className="bg-goat-gold text-black font-bold px-6 py-2.5 rounded-xl hover:bg-yellow-400 active:scale-[0.98] transition-all disabled:opacity-50"
           >
-            {loading ? "Searching..." : "Search"}
+            {loading ? "..." : "Search"}
           </button>
         </form>
 
         {results.length > 0 && (
           <div className="mt-4 space-y-3">
             {results.map((r, i) => (
-              <div key={i} className="bg-black/80 border border-yellow-900/30 rounded-lg p-4">
+              <motion.div
+                key={i}
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: i * 0.05 }}
+                className="bg-black/50 border border-yellow-900/30 rounded-xl p-4"
+              >
                 <div className="flex items-center gap-2 mb-2">
-                  <span className="text-xs bg-yellow-900/50 text-yellow-200 px-2 py-0.5 rounded">
+                  <span className="text-xs bg-yellow-900/40 text-yellow-200 px-2.5 py-0.5 rounded-full">
                     {r.metadata.topic || "general"}
                   </span>
-                  <span className="text-xs text-yellow-200/50">
-                    Score: {(r.score * 100).toFixed(1)}%
+                  <span className="text-xs text-yellow-200/30">
+                    {(r.score * 100).toFixed(0)}% match
                   </span>
                 </div>
-                <p className="text-white text-sm">{r.content}</p>
-              </div>
+                <p className="text-white text-sm leading-relaxed">{r.content}</p>
+              </motion.div>
             ))}
           </div>
         )}
       </div>
 
       {/* Add Document */}
-      <div className="bg-black/60 border border-yellow-900/50 rounded-lg p-6">
-        <h3 className="text-lg font-bold text-goat-gold mb-3">Add Knowledge</h3>
+      <div className="bg-black/40 border border-yellow-900/40 rounded-xl p-6">
+        <h3 className="text-lg font-bold text-yellow-100 mb-4">Add Knowledge</h3>
         <form onSubmit={handleAddDoc} className="space-y-4">
           <input
             type="text"
             value={docTopic}
             onChange={(e) => setDocTopic(e.target.value)}
             placeholder="Topic (e.g. mechanical-royalties, contracts)"
-            className="w-full bg-black/80 border border-yellow-900/50 rounded px-4 py-2 text-white placeholder:text-yellow-200/30 focus:outline-none focus:border-goat-gold"
+            className="w-full bg-black/50 border border-yellow-900/40 rounded-xl px-4 py-2.5 text-white placeholder:text-yellow-200/30 focus:outline-none focus:border-goat-gold focus:ring-1 focus:ring-goat-gold/20 transition"
           />
           <textarea
             value={docContent}
             onChange={(e) => setDocContent(e.target.value)}
             placeholder="Paste knowledge content here..."
             rows={5}
-            className="w-full bg-black/80 border border-yellow-900/50 rounded-lg px-4 py-3 text-white placeholder:text-yellow-200/30 focus:outline-none focus:border-goat-gold resize-none"
+            className="w-full bg-black/50 border border-yellow-900/40 rounded-xl px-4 py-3 text-white placeholder:text-yellow-200/30 focus:outline-none focus:border-goat-gold focus:ring-1 focus:ring-goat-gold/20 transition resize-none"
           />
           <button
             type="submit"
-            className="bg-goat-gold text-black font-bold px-6 py-2 rounded hover:bg-yellow-400 transition"
+            className="bg-goat-gold text-black font-bold px-6 py-2.5 rounded-xl hover:bg-yellow-400 active:scale-[0.98] transition-all"
           >
             Add to Knowledge Base
           </button>
@@ -138,11 +153,11 @@ export default function Knowledge() {
 
       {/* Topics */}
       {stats?.topics && stats.topics.length > 0 && (
-        <div className="bg-black/60 border border-yellow-900/50 rounded-lg p-6">
-          <h3 className="text-lg font-bold text-goat-gold mb-3">Topics</h3>
+        <div className="bg-black/40 border border-yellow-900/40 rounded-xl p-6">
+          <h3 className="text-lg font-bold text-yellow-100 mb-4">Topics</h3>
           <div className="flex flex-wrap gap-2">
             {stats.topics.map((topic: string) => (
-              <span key={topic} className="bg-yellow-900/30 text-yellow-200 px-3 py-1 rounded-full text-sm">
+              <span key={topic} className="bg-yellow-900/30 text-yellow-200 px-4 py-1.5 rounded-full text-sm border border-yellow-900/20">
                 {topic}
               </span>
             ))}

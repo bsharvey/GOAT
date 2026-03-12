@@ -1,0 +1,12 @@
+[build]
+builder = "nixpacks"
+buildCommand = "pnpm install && pnpm build"
+
+[deploy]
+startCommand = "node packages/api/dist/index.js"
+healthcheckPath = "/api/health"
+restartPolicyType = "on_failure"
+restartPolicyMaxRetries = 3
+
+[service]
+internalPort = 5001

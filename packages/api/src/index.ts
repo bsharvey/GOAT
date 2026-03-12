@@ -2,6 +2,9 @@ import express from "express";
 import cors from "cors";
 import helmet from "helmet";
 import { config } from "dotenv";
+import { fileURLToPath } from "url";
+import { dirname, join } from "path";
+import { existsSync } from "fs";
 import { loyaltyMiddleware } from "./middleware/loyalty.js";
 import { royaltyRoutes } from "./routes/royalties.js";
 import { agentRoutes } from "./routes/agent.js";
@@ -45,10 +48,23 @@ app.use("/api/spotify", spotifyRoutes());
 app.use("/api/voice", voiceRoutes());
 app.use("/api/security", securityRoutes());
 
-// Archetypal AI Civilization routes
+// Archetypal AI Civilization routes (invisible backbone)
 app.use("/api/archetypes", archetypeRoutes());
 app.use("/api/council", councilRoutes());
 app.use("/api/decisions", decisionRoutes());
+
+// Serve frontend static files in production
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+const webDistPath = join(__dirname, "../../web/dist");
+
+if (process.env.NODE_ENV === "production" && existsSync(webDistPath)) {
+  app.use(express.static(webDistPath));
+  // SPA catch-all — serve index.html for all non-API routes
+  app.get("*", (_req, res) => {
+    res.sendFile(join(webDistPath, "index.html"));
+  });
+}
 
 app.listen(PORT, () => {
   console.log(`GOAT API running on http://localhost:${PORT}`);

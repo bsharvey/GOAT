@@ -1,0 +1,12 @@
+services:
+  - type: web
+    name: goat-api
+    runtime: node
+    plan: free
+    buildCommand: pnpm install && pnpm build
+    startCommand: node packages/api/dist/index.js
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 5001
