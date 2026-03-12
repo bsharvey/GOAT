@@ -1,23 +1,22 @@
 /**
  * Autonomous Agent Manager — GOAT Force AI Agents
  *
- * 4 specialized agents that handle different domains:
- * - Royalty Tracker: monitors and analyzes royalty streams
- * - Content Advisor: recommends content strategies
- * - Contract Analyst: reviews and drafts contracts
- * - Marketing Agent: plans marketing campaigns
+ * 4 specialized agents + agentic loop with function-calling tools.
+ * Every agent response passes through the civilization middleware.
  */
 
 import type { AgentType, AgentTask, AgentDecision, AgentMetrics } from "@goat/core";
 import { OmniLLMService } from "./omni-llm.js";
 import { ragService } from "./rag.js";
+import { civilizationProcess } from "../middleware/civilization.js";
+import { AGENT_TOOLS, getTool, getToolDefinitions } from "./agent-tools.js";
 
 interface AgentDef {
   type: AgentType;
   name: string;
   model: string;
   systemPrompt: string;
-  tools: string[];
+  toolNames: string[];
 }
 
 const AGENTS: AgentDef[] = [
@@ -32,7 +31,7 @@ const AGENTS: AgentDef[] = [
 - Alert when black box royalties may be unclaimed
 - Provide revenue forecasts based on streaming trends
 Always be specific with numbers and cite data sources.`,
-    tools: ["analyze-revenue", "track-streams", "detect-underpayment", "forecast"],
+    toolNames: ["analyze_royalties", "revenue_forecast", "generate_report", "payment_summary"],
   },
   {
     type: "content-advisor",
@@ -45,7 +44,7 @@ Always be specific with numbers and cite data sources.`,
 - Optimize metadata (tags, descriptions, artwork) for discovery
 - Track TikTok trends and sync opportunities
 Be practical and data-driven.`,
-    tools: ["analyze-content", "recommend-strategy", "trend-detection"],
+    toolNames: ["search_knowledge", "manage_artist", "analyze_royalties"],
   },
   {
     type: "contract-analyst",
@@ -58,7 +57,7 @@ Be practical and data-driven.`,
 - Recommend reversion clause terms
 - Draft smart contract parameters for on-chain royalty splits
 Always prioritize the artist's interests.`,
-    tools: ["review-contract", "calculate-splits", "draft-terms"],
+    toolNames: ["contract_analysis", "manage_artist", "analyze_royalties"],
   },
   {
     type: "marketing",
@@ -71,7 +70,7 @@ Always prioritize the artist's interests.`,
 - Analyze competitor marketing approaches
 - Optimize ad spend allocation
 Be creative but budget-conscious.`,
-    tools: ["plan-campaign", "analyze-demographics", "optimize-spend"],
+    toolNames: ["search_knowledge", "manage_artist", "analyze_royalties"],
   },
 ];
 
@@ -90,11 +89,33 @@ export class AgentManager {
       type: a.type,
       name: a.name,
       model: a.model,
-      tools: a.tools,
+      tools: a.toolNames,
     }));
   }
 
-  async executeAgent(agentType: AgentType, prompt: string): Promise<string> {
+  /** Get available tool definitions for an agent type */
+  getAgentTools(agentType: AgentType) {
+    const agent = AGENTS.find((a) => a.type === agentType);
+    if (!agent) return [];
+    return agent.toolNames
+      .map((name) => getTool(name))
+      .filter((t): t is NonNullable<typeof t> => !!t);
+  }
+
+  /** Get all tool definitions (OpenAI function-calling format) */
+  getAllToolDefinitions() {
+    return getToolDefinitions();
+  }
+
+  /**
+   * Execute an agent with optional agentic tool-calling loop.
+   * maxIterations controls how many tool calls the agent can make.
+   */
+  async executeAgent(
+    agentType: AgentType,
+    prompt: string,
+    options?: { maxIterations?: number; userId?: string },
+  ): Promise<string> {
     const agent = AGENTS.find((a) => a.type === agentType);
     if (!agent) throw new Error(`Unknown agent type: ${agentType}`);
 
@@ -108,38 +129,132 @@ export class AgentManager {
     };
 
     this.taskQueue.push(task);
+    const maxIter = options?.maxIterations ?? 5;
 
     try {
       // Build RAG context
       const ragContext = ragService.buildContext(prompt);
 
-      // Build full prompt with agent system prompt + RAG context
-      const fullPrompt = `${agent.systemPrompt}\n\n${ragContext}User request: ${prompt}`;
+      // List available tools for this agent
+      const availableTools = agent.toolNames.join(", ");
+      const toolDescriptions = this.getAgentTools(agentType)
+        .map((t) => `- ${t.name}: ${t.description}`)
+        .join("\n");
 
-      const result = await this.llm.callModel(agent.model, fullPrompt);
+      const systemPrompt = `${agent.systemPrompt}
+
+Available tools: ${availableTools}
+${toolDescriptions}
+
+To use a tool, respond with JSON: {"tool": "tool_name", "params": {...}}
+When you have a final answer, respond normally without JSON.`;
+
+      let fullPrompt = `${systemPrompt}\n\n${ragContext}User request: ${prompt}`;
+      let result = "";
+      let iterations = 0;
+
+      // Agentic loop — agent can call tools up to maxIter times
+      while (iterations < maxIter) {
+        iterations++;
+        const response = await this.llm.callModel(agent.model, fullPrompt);
+
+        // Check if response contains a tool call
+        const toolCall = this.parseToolCall(response);
+        if (!toolCall) {
+          // No tool call — this is the final answer
+          result = response;
+          break;
+        }
+
+        // Execute the tool
+        const tool = getTool(toolCall.tool);
+        if (!tool || !agent.toolNames.includes(toolCall.tool)) {
+          result = response; // Unknown tool — treat as final answer
+          break;
+        }
+
+        try {
+          const toolResult = await tool.execute(toolCall.params);
+          // Feed tool result back into the conversation
+          fullPrompt = `${fullPrompt}\n\nAssistant: ${response}\n\nTool result (${toolCall.tool}):\n${JSON.stringify(toolResult, null, 2)}\n\nContinue with the task. Use another tool or provide your final answer.`;
+        } catch (toolError) {
+          const errMsg = toolError instanceof Error ? toolError.message : "Tool execution failed";
+          fullPrompt = `${fullPrompt}\n\nAssistant: ${response}\n\nTool error (${toolCall.tool}): ${errMsg}\n\nContinue with the task.`;
+        }
+      }
+
+      if (!result) {
+        result = "Agent reached maximum iterations without a final answer.";
+      }
+
+      // Run through civilization middleware (silent governance)
+      const { response: governed } = await civilizationProcess(prompt, result, {
+        category: agentType,
+        userId: options?.userId,
+      });
 
       // Record decision
       const decision: AgentDecision = {
         id: `dec-${Date.now()}`,
         agentType,
         task: prompt,
-        decision: result.slice(0, 200),
+        decision: governed.slice(0, 200),
         confidence: 0.85,
-        reasoning: `Processed by ${agent.name} using ${agent.model}`,
+        reasoning: `Processed by ${agent.name} (${iterations} iterations)`,
         timestamp: new Date(),
       };
       this.decisions.push(decision);
       if (this.decisions.length > 1000) this.decisions.shift();
 
       task.status = "completed";
-      task.result = result;
+      task.result = governed;
       task.completedAt = new Date();
 
-      return result;
+      return governed;
     } catch (error) {
       task.status = "error";
       task.error = error instanceof Error ? error.message : "Unknown error";
       throw error;
+    }
+  }
+
+  /** Parse a tool call from agent response */
+  private parseToolCall(response: string): { tool: string; params: Record<string, unknown> } | null {
+    try {
+      // Look for JSON in the response
+      const jsonMatch = response.match(/\{[\s\S]*"tool"\s*:\s*"[^"]+[\s\S]*\}/);
+      if (!jsonMatch) return null;
+
+      const parsed = JSON.parse(jsonMatch[0]) as { tool?: string; params?: Record<string, unknown> };
+      if (parsed.tool && typeof parsed.tool === "string") {
+        return { tool: parsed.tool, params: parsed.params || {} };
+      }
+      return null;
+    } catch {
+      return null;
+    }
+  }
+
+  /**
+   * Run an autonomous task — the agent decides what tools to use
+   * and iterates until complete.
+   */
+  async runAutonomous(
+    taskDescription: string,
+    options?: { maxIterations?: number; agentType?: AgentType },
+  ): Promise<{ success: boolean; result: string; iterations: number }> {
+    const agentType = options?.agentType || "royalty-tracker";
+    const maxIter = options?.maxIterations ?? 10;
+
+    try {
+      const result = await this.executeAgent(agentType, taskDescription, { maxIterations: maxIter });
+      return { success: true, result, iterations: maxIter };
+    } catch (error) {
+      return {
+        success: false,
+        result: error instanceof Error ? error.message : "Autonomous task failed",
+        iterations: 0,
+      };
     }
   }
 

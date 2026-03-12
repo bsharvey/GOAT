@@ -2,8 +2,13 @@ import { useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { motion } from "framer-motion";
 import axios from "axios";
+import {
+  AreaChart, Area, PieChart, Pie, Cell,
+  XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
+} from "recharts";
 
 const API = import.meta.env.VITE_API_URL || "";
+const CHART_COLORS = ["#d4a017", "#e6b422", "#f0c030", "#c49000", "#b8860b", "#daa520"];
 
 function exportCSV(data: Record<string, unknown>[], filename: string) {
   if (data.length === 0) return;
@@ -49,6 +54,16 @@ export default function Dashboard() {
   const { data: superBassData } = useQuery({
     queryKey: ["superbass"],
     queryFn: () => axios.get(`${API}/api/data/superbass`).then((r) => r.data.data),
+  });
+
+  const { data: revenueByPeriod } = useQuery({
+    queryKey: ["dashboard-revenue-period"],
+    queryFn: () => axios.get(`${API}/api/reports/revenue-by-period?months=12`).then((r) => r.data.data).catch(() => []),
+  });
+
+  const { data: revenueBySource } = useQuery({
+    queryKey: ["dashboard-revenue-source"],
+    queryFn: () => axios.get(`${API}/api/reports/revenue-by-source`).then((r) => r.data.data).catch(() => []),
   });
 
   const handleAddSong = async (e: React.FormEvent) => {
@@ -127,6 +142,76 @@ export default function Dashboard() {
             </p>
           </motion.div>
         ))}
+      </div>
+
+      {/* Revenue Charts */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Revenue Over Time */}
+        {revenueByPeriod && revenueByPeriod.length > 0 && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.3 }}
+            className="bg-black/50 border border-yellow-900/40 rounded-xl p-6"
+          >
+            <h3 className="text-lg font-bold text-yellow-300 mb-4">Revenue Trend (12 months)</h3>
+            <ResponsiveContainer width="100%" height={220}>
+              <AreaChart data={revenueByPeriod}>
+                <defs>
+                  <linearGradient id="dashGoldGrad" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stopColor="#d4a017" stopOpacity={0.4} />
+                    <stop offset="100%" stopColor="#d4a017" stopOpacity={0} />
+                  </linearGradient>
+                </defs>
+                <CartesianGrid strokeDasharray="3 3" stroke="#333" />
+                <XAxis dataKey="period" tick={{ fill: "#a0a0a0", fontSize: 10 }} />
+                <YAxis tick={{ fill: "#a0a0a0", fontSize: 10 }} tickFormatter={(v: number) => `$${v}`} />
+                <Tooltip
+                  contentStyle={{ background: "#111", border: "1px solid #444", borderRadius: 8 }}
+                  labelStyle={{ color: "#d4a017" }}
+                  formatter={(value: number) => [`$${value.toFixed(2)}`, "Revenue"]}
+                />
+                <Area type="monotone" dataKey="total" stroke="#d4a017" fill="url(#dashGoldGrad)" strokeWidth={2} />
+              </AreaChart>
+            </ResponsiveContainer>
+          </motion.div>
+        )}
+
+        {/* Revenue by Source Pie */}
+        {revenueBySource && revenueBySource.length > 0 && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.4 }}
+            className="bg-black/50 border border-yellow-900/40 rounded-xl p-6"
+          >
+            <h3 className="text-lg font-bold text-yellow-300 mb-4">Revenue by Source</h3>
+            <ResponsiveContainer width="100%" height={220}>
+              <PieChart>
+                <Pie
+                  data={revenueBySource}
+                  dataKey="total"
+                  nameKey="source"
+                  cx="50%"
+                  cy="50%"
+                  outerRadius={80}
+                  label={({ source, percent }: { source: string; percent: number }) =>
+                    `${source} ${(percent * 100).toFixed(0)}%`
+                  }
+                  labelLine={{ stroke: "#666" }}
+                >
+                  {(revenueBySource as Array<{ source: string; total: number }>).map((_: unknown, i: number) => (
+                    <Cell key={i} fill={CHART_COLORS[i % CHART_COLORS.length]} />
+                  ))}
+                </Pie>
+                <Tooltip
+                  contentStyle={{ background: "#111", border: "1px solid #444", borderRadius: 8 }}
+                  formatter={(value: number) => [`$${value.toFixed(2)}`, "Revenue"]}
+                />
+              </PieChart>
+            </ResponsiveContainer>
+          </motion.div>
+        )}
       </div>
 
       {/* Add Song Form */}

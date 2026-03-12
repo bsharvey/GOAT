@@ -21,5 +21,8 @@
     "dist:win": "pnpm --filter @goat/web dist:win"
   },
   "author": "Harvey Miller (DJ Speedy)",
-  "license": "UNLICENSED"
+  "license": "UNLICENSED",
+  "devDependencies": {
+    "wrangler": "^4.72.0"
+  }
 }

@@ -2,6 +2,7 @@ import express from "express";
 import cors from "cors";
 import helmet from "helmet";
 import { config } from "dotenv";
+import { connectDB } from "./db.js";
 import { fileURLToPath } from "url";
 import { dirname, join } from "path";
 import { existsSync } from "fs";
@@ -20,15 +21,29 @@ import { spotifyRoutes } from "./routes/spotify.js";
 import { archetypeRoutes } from "./routes/archetypes.js";
 import { councilRoutes } from "./routes/council.js";
 import { decisionRoutes } from "./routes/decisions.js";
+import { authRoutes } from "./routes/auth.js";
+import { artistRoutes } from "./routes/artists.js";
+import { paymentRoutes } from "./routes/payments.js";
+import { contractRoutes } from "./routes/contracts.js";
+import { reportRoutes } from "./routes/reports.js";
+import { errorHandler, notFound } from "./middleware/error-handler.js";
 
 config();
+
+// Connect to Supabase
+connectDB();
 
 const app = express();
 const PORT = process.env.PORT || 5001;
 
 // Base middleware
 app.use(helmet());
-app.use(cors());
+app.use(cors({
+  origin: process.env.CORS_ORIGIN
+    ? process.env.CORS_ORIGIN.split(",")
+    : ["http://localhost:3000", "http://localhost:5173", "https://goat-app.pages.dev"],
+  credentials: true,
+}));
 app.use(express.json({ limit: "10mb" }));
 
 // GOAT Force loyalty middleware — applied to ALL routes
@@ -48,6 +63,13 @@ app.use("/api/spotify", spotifyRoutes());
 app.use("/api/voice", voiceRoutes());
 app.use("/api/security", securityRoutes());
 
+// Auth & CRUD routes
+app.use("/api/auth", authRoutes());
+app.use("/api/artists", artistRoutes());
+app.use("/api/payments", paymentRoutes());
+app.use("/api/contracts", contractRoutes());
+app.use("/api/reports", reportRoutes());
+
 // Archetypal AI Civilization routes (invisible backbone)
 app.use("/api/archetypes", archetypeRoutes());
 app.use("/api/council", councilRoutes());
@@ -65,6 +87,10 @@ if (process.env.NODE_ENV === "production" && existsSync(webDistPath)) {
     res.sendFile(join(webDistPath, "index.html"));
   });
 }
+
+// Error handling (after all routes)
+app.use(notFound);
+app.use(errorHandler);
 
 app.listen(PORT, () => {
   console.log(`GOAT API running on http://localhost:${PORT}`);

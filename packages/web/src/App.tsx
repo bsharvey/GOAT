@@ -10,10 +10,18 @@ import Council from "./pages/Council.js";
 import Archetypes from "./pages/Archetypes.js";
 import Decisions from "./pages/Decisions.js";
 import Production from "./pages/Production.js";
+import Artists from "./pages/Artists.js";
+import Contracts from "./pages/Contracts.js";
+import Payments from "./pages/Payments.js";
+import Reports from "./pages/Reports.js";
 
 // User-facing navigation — clean, approachable, no mysticism
 const NAV_ITEMS = [
   { path: "/", label: "Dashboard" },
+  { path: "/artists", label: "Artists" },
+  { path: "/contracts", label: "Contracts" },
+  { path: "/payments", label: "Payments" },
+  { path: "/reports", label: "Reports" },
   { path: "/production", label: "Production" },
   { path: "/agent", label: "AI Assistant" },
   { path: "/agents", label: "Smart Agents" },
@@ -122,6 +130,10 @@ export default function App() {
         <Routes>
           {/* User-facing routes */}
           <Route path="/" element={<Dashboard />} />
+          <Route path="/artists" element={<Artists />} />
+          <Route path="/contracts" element={<Contracts />} />
+          <Route path="/payments" element={<Payments />} />
+          <Route path="/reports" element={<Reports />} />
           <Route path="/production" element={<Production />} />
           <Route path="/agent" element={<Agent />} />
           <Route path="/agents" element={<Agents />} />
