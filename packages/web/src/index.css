@@ -1,0 +1,15 @@
+@import "tailwindcss";
+
+@theme {
+  --color-goat-gold: #facc15;
+  --color-goat-dark: #0a0a0a;
+  --color-goat-red: #dc2626;
+  --color-goat-blue: #3b82f6;
+}
+
+body {
+  margin: 0;
+  background-color: var(--color-goat-dark);
+  color: white;
+  font-family: system-ui, -apple-system, sans-serif;
+}

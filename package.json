@@ -1,0 +1,22 @@
+{
+  "name": "goat",
+  "version": "1.0.0",
+  "private": true,
+  "description": "GOAT - Music Royalty Platform with OmniLLM, APEX Security & Voice Assistant",
+  "packageManager": "pnpm@10.30.3",
+  "engines": {
+    "node": ">=20.0.0"
+  },
+  "scripts": {
+    "dev": "pnpm --filter @goat/api dev",
+    "dev:web": "pnpm --filter @goat/web dev",
+    "dev:all": "pnpm -r --parallel dev",
+    "build": "pnpm -r build",
+    "typecheck": "pnpm -r typecheck",
+    "test": "pnpm -r test",
+    "lint": "pnpm -r lint",
+    "cli": "pnpm --filter @goat/cli start"
+  },
+  "author": "Harvey Miller (DJ Speedy)",
+  "license": "UNLICENSED"
+}
