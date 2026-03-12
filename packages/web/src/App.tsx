@@ -11,17 +11,19 @@ import Archetypes from "./pages/Archetypes.js";
 import Decisions from "./pages/Decisions.js";
 import Production from "./pages/Production.js";
 
+// User-facing navigation — clean, approachable, no mysticism
 const NAV_ITEMS = [
   { path: "/", label: "Dashboard" },
   { path: "/production", label: "Production" },
-  { path: "/agent", label: "OmniLLM" },
-  { path: "/agents", label: "Agents" },
-  { path: "/knowledge", label: "Knowledge" },
-  { path: "/security", label: "APEX Security" },
-  { path: "/council", label: "Council" },
-  { path: "/archetypes", label: "Archetypes" },
-  { path: "/decisions", label: "Decisions" },
+  { path: "/agent", label: "AI Assistant" },
+  { path: "/agents", label: "Smart Agents" },
+  { path: "/knowledge", label: "Knowledge Base" },
+  { path: "/security", label: "Security" },
 ];
+
+// Admin-only routes — Archetypal AI infrastructure lives here (hidden from users)
+// These routes still exist but are not in the nav.
+// Access via direct URL: /admin/council, /admin/archetypes, /admin/decisions
 
 export default function App() {
   const location = useLocation();
@@ -118,15 +120,18 @@ export default function App() {
       {/* Main content */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 py-8">
         <Routes>
+          {/* User-facing routes */}
           <Route path="/" element={<Dashboard />} />
           <Route path="/production" element={<Production />} />
           <Route path="/agent" element={<Agent />} />
           <Route path="/agents" element={<Agents />} />
           <Route path="/knowledge" element={<Knowledge />} />
           <Route path="/security" element={<Security />} />
-          <Route path="/council" element={<Council />} />
-          <Route path="/archetypes" element={<Archetypes />} />
-          <Route path="/decisions" element={<Decisions />} />
+
+          {/* Admin-only routes — Archetypal AI infrastructure (hidden from nav) */}
+          <Route path="/admin/council" element={<Council />} />
+          <Route path="/admin/archetypes" element={<Archetypes />} />
+          <Route path="/admin/decisions" element={<Decisions />} />
         </Routes>
       </main>
 
@@ -137,7 +142,7 @@ export default function App() {
             <img src="/images/goat-logo2.png" alt="" className="w-6 h-6 rounded object-cover opacity-60" />
             <span className="text-yellow-200/40 text-sm">GOAT Platform by DJ Speedy</span>
           </div>
-          <span className="text-yellow-200/30 text-xs">Powered by OmniLLM</span>
+          <span className="text-yellow-200/30 text-xs">AI-Powered</span>
         </div>
       </footer>
     </div>
