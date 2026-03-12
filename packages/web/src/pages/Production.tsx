@@ -1,4 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
+import { motion } from "framer-motion";
 import axios from "axios";
 
 const API = import.meta.env.VITE_API_URL || "";
@@ -26,15 +27,29 @@ export default function Production() {
   const toolData = tools?.tools;
 
   return (
-    <div className="max-w-7xl mx-auto space-y-8">
-      <div className="text-center">
-        <h2 className="text-4xl font-bold text-goat-gold drop-shadow-lg" style={{ fontFamily: "'Bangers', cursive" }}>
-          Speedy Productions
-        </h2>
-        <p className="text-yellow-200/70 mt-2">
-          Music Catalog, Production Tools & Sample Library
-        </p>
-      </div>
+    <div className="space-y-8">
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="relative overflow-hidden rounded-2xl border border-yellow-900/40 bg-gradient-to-br from-yellow-950/30 via-black/60 to-black/80 p-8"
+      >
+        <div className="absolute top-0 right-0 w-64 h-64 bg-goat-gold/5 rounded-full blur-3xl" />
+        <div className="flex items-center gap-6">
+          <img
+            src="/images/goat-logo-alt1.png"
+            alt="DJ Speedy"
+            className="hidden md:block w-28 h-28 rounded-xl object-cover ring-2 ring-yellow-900/40"
+          />
+          <div>
+            <h2 className="text-4xl font-bangers tracking-wide text-shimmer mb-2">
+              Speedy Productions
+            </h2>
+            <p className="text-yellow-200/60 text-lg">
+              Music Catalog, Production Tools & Sample Library
+            </p>
+          </div>
+        </div>
+      </motion.div>
 
       {/* Catalog Stats */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">

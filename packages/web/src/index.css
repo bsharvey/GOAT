@@ -1,10 +1,20 @@
 @import "tailwindcss";
 
+@font-face {
+  font-family: "Bangers";
+  src: url("/fonts/Bangers-Regular.ttf") format("truetype");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
 @theme {
   --color-goat-gold: #facc15;
   --color-goat-dark: #0a0a0a;
   --color-goat-red: #dc2626;
   --color-goat-blue: #3b82f6;
+  --color-goat-purple: #a855f7;
+  --font-family-bangers: "Bangers", cursive;
 }
 
 body {
@@ -12,4 +22,44 @@ body {
   background-color: var(--color-goat-dark);
   color: white;
   font-family: system-ui, -apple-system, sans-serif;
+}
+
+/* Animated gold gradient for hero text */
+@keyframes shimmer {
+  0% { background-position: -200% center; }
+  100% { background-position: 200% center; }
+}
+
+.text-shimmer {
+  background: linear-gradient(90deg, #facc15 0%, #fef08a 25%, #facc15 50%, #eab308 75%, #facc15 100%);
+  background-size: 200% auto;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: shimmer 3s linear infinite;
+}
+
+/* Subtle glow for cards on hover */
+.card-glow {
+  transition: box-shadow 0.3s ease, border-color 0.3s ease;
+}
+.card-glow:hover {
+  box-shadow: 0 0 20px rgba(250, 204, 21, 0.15);
+  border-color: rgba(250, 204, 21, 0.4);
+}
+
+/* Gold pulse for active elements */
+@keyframes gold-pulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(250, 204, 21, 0.3); }
+  50% { box-shadow: 0 0 12px 4px rgba(250, 204, 21, 0.15); }
+}
+.pulse-gold {
+  animation: gold-pulse 2s ease-in-out infinite;
+}
+
+/* Nav glass effect */
+.nav-glass {
+  background: linear-gradient(180deg, rgba(10, 10, 10, 0.95) 0%, rgba(10, 10, 10, 0.85) 100%);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
 }
