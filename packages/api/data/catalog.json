@@ -1,0 +1,90 @@
+{
+  "catalog": {
+    "owner": "DJ Speedy / Speedy Productions, Inc",
+    "totalTracks": 3103,
+    "genres": [
+      { "name": "Full Tracks For Syncing", "tracks": 561 },
+      { "name": "Movie Scores", "tracks": 313 },
+      { "name": "Hip Hop R&B", "tracks": 293 },
+      { "name": "Tracks From DJ Speedy Kit", "tracks": 252 },
+      { "name": "Tropical Island Flavor", "tracks": 213 },
+      { "name": "Rock/Country", "tracks": 212 },
+      { "name": "EDM Catalog", "tracks": 164 },
+      { "name": "EDM Pop", "tracks": 151 },
+      { "name": "Country Catalog", "tracks": 143 },
+      { "name": "Jingle Music", "tracks": 114 },
+      { "name": "French Cafe Music", "tracks": 107 },
+      { "name": "Trailers", "tracks": 103 },
+      { "name": "Modern Country", "tracks": 100 },
+      { "name": "OCT 25th 2017 Collection", "tracks": 89 },
+      { "name": "Songs", "tracks": 82 },
+      { "name": "Modern Reggae", "tracks": 79 },
+      { "name": "Africa", "tracks": 73 },
+      { "name": "World Music", "tracks": 72 },
+      { "name": "Hip Hop Catalog", "tracks": 67 },
+      { "name": "Disco", "tracks": 62 },
+      { "name": "Modern Hip Hop", "tracks": 49 },
+      { "name": "Gospel", "tracks": 42 },
+      { "name": "Island Catalog", "tracks": 40 },
+      { "name": "Modern Rock", "tracks": 37 },
+      { "name": "Modern Pop", "tracks": 31 },
+      { "name": "Future Bass", "tracks": 25 },
+      { "name": "Orchestral", "tracks": 11 },
+      { "name": "Spa/Elevator", "tracks": 3 },
+      { "name": "DJ Speedy Records With Vocals", "tracks": 2 }
+    ],
+    "projects": [
+      { "name": "DJ SPEEDY WAKA 1", "type": "Logic Pro X", "artist": "DJ Speedy x Waka Flocka" },
+      { "name": "DJ SPEEDY WAKA 2", "type": "Logic Pro X", "artist": "DJ Speedy x Waka Flocka" },
+      { "name": "DJ SPEEDY WAKA 3", "type": "Logic Pro X", "artist": "DJ Speedy x Waka Flocka" },
+      { "name": "Bronco Wild Wild West", "type": "Stems + WAVs", "artist": "DJ Speedy" }
+    ],
+    "syncReady": true,
+    "catalogSource": "/Volumes/PLUGINS/Dj Speedy Speedy Productions, Inc Catalog For Sync:Placements"
+  },
+  "productionTools": {
+    "daws": [
+      { "name": "FL Studio", "version": "24.2.2", "platform": ["macOS", "Windows"] },
+      { "name": "Logic Pro X", "platform": ["macOS"] }
+    ],
+    "plugins": {
+      "mastering": [
+        { "name": "iZotope Ozone 11 Advanced", "type": "Mastering Suite" },
+        { "name": "iZotope Neutron 5", "type": "Mixing/Channel Strip" },
+        { "name": "Sonoris Parallel Equalizer", "type": "EQ" }
+      ],
+      "instruments": [
+        { "name": "Native Instruments Kontakt 8", "type": "Sampler" },
+        { "name": "Native Instruments Massive X", "type": "Synthesizer" },
+        { "name": "Native Instruments Massive", "type": "Synthesizer" },
+        { "name": "Native Instruments Battery 4", "type": "Drums" },
+        { "name": "Native Instruments Maschine 3", "type": "Production" },
+        { "name": "Native Instruments Komplete Kontrol 3", "type": "Controller" }
+      ],
+      "effects": [
+        { "name": "iZotope VocalSynth 2", "type": "Vocal FX" },
+        { "name": "Blue Cat MB-7 Mixer", "type": "Multiband" },
+        { "name": "Blue Cat PatchWork", "type": "Plugin Host" },
+        { "name": "Boz Digital Mongoose 2", "type": "Stereo Imaging" }
+      ],
+      "video": [
+        { "name": "EditShare Lightworks Pro 14", "type": "Video Editor" },
+        { "name": "Adobe After Effects 2025", "type": "Motion Graphics" },
+        { "name": "Adobe Photoshop 2025", "type": "Image Editor" },
+        { "name": "Adobe Illustrator 2025", "type": "Vector Graphics" },
+        { "name": "Adobe Lightroom Classic 2025", "type": "Photo Editor" },
+        { "name": "Adobe Substance 3D Suite", "type": "3D Design" },
+        { "name": "Topaz Video AI", "type": "AI Video Enhancement" },
+        { "name": "Topaz Gigapixel AI", "type": "AI Image Upscaling" },
+        { "name": "Topaz Photo AI", "type": "AI Photo Enhancement" }
+      ]
+    },
+    "samplePacks": [
+      { "name": "Southside - I Invented Trap Vol.1", "format": "WAV" },
+      { "name": "Future Loops Southside", "format": "WAV" },
+      { "name": "Soul Chemist - Dark Vintage (Blavatsky)", "format": "WAV" },
+      { "name": "Serato Sample Starter Pack", "format": "WAV" },
+      { "name": "FL Studio Master Chain", "format": "Preset" }
+    ]
+  }
+}

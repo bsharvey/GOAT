@@ -1,0 +1,17 @@
+[
+    {
+      "Artist": "Alice",
+      "ISRC": "US-ABC-21-12345",
+      "Mechanical": "123.45",
+      "Plays": 1200,
+      "Likes": 300
+    },
+    {
+      "Artist": "Bob",
+      "ISRC": "US-DEF-21-67890",
+      "Mechanical": "67.89",
+      "Plays": 850,
+      "Likes": 150
+    }
+  ]
+  

@@ -36,6 +36,9 @@ coverage/
 # Electron
 release/
 
+# Claude Code
+.claude/
+
 # Temp
 .temp/
 tmp/

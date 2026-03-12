@@ -4,6 +4,9 @@ import Security from "./pages/Security.js";
 import Agent from "./pages/Agent.js";
 import Agents from "./pages/Agents.js";
 import Knowledge from "./pages/Knowledge.js";
+import Council from "./pages/Council.js";
+import Archetypes from "./pages/Archetypes.js";
+import Decisions from "./pages/Decisions.js";
 
 export default function App() {
   return (
@@ -27,6 +30,15 @@ export default function App() {
             <a href="/security" className="text-yellow-200 hover:text-goat-gold transition">
               APEX Security
             </a>
+            <a href="/council" className="text-yellow-200 hover:text-goat-gold transition">
+              Council
+            </a>
+            <a href="/archetypes" className="text-yellow-200 hover:text-goat-gold transition">
+              Archetypes
+            </a>
+            <a href="/decisions" className="text-yellow-200 hover:text-goat-gold transition">
+              Decisions
+            </a>
           </div>
         </div>
       </nav>
@@ -37,6 +49,9 @@ export default function App() {
           <Route path="/agents" element={<Agents />} />
           <Route path="/knowledge" element={<Knowledge />} />
           <Route path="/security" element={<Security />} />
+          <Route path="/council" element={<Council />} />
+          <Route path="/archetypes" element={<Archetypes />} />
+          <Route path="/decisions" element={<Decisions />} />
         </Routes>
       </main>
     </div>

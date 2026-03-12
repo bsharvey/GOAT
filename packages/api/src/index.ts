@@ -14,6 +14,9 @@ import { agentManagerRoutes } from "./routes/agents.js";
 import { ragRoutes } from "./routes/rag.js";
 import { dataRoutes } from "./routes/data.js";
 import { spotifyRoutes } from "./routes/spotify.js";
+import { archetypeRoutes } from "./routes/archetypes.js";
+import { councilRoutes } from "./routes/council.js";
+import { decisionRoutes } from "./routes/decisions.js";
 
 config();
 
@@ -41,6 +44,11 @@ app.use("/api/data", dataRoutes());
 app.use("/api/spotify", spotifyRoutes());
 app.use("/api/voice", voiceRoutes());
 app.use("/api/security", securityRoutes());
+
+// Archetypal AI Civilization routes
+app.use("/api/archetypes", archetypeRoutes());
+app.use("/api/council", councilRoutes());
+app.use("/api/decisions", decisionRoutes());
 
 app.listen(PORT, () => {
   console.log(`GOAT API running on http://localhost:${PORT}`);
