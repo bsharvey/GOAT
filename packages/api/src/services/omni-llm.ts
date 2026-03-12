@@ -1,8 +1,8 @@
 import Anthropic from "@anthropic-ai/sdk";
 import OpenAI from "openai";
 import { GoogleGenerativeAI } from "@google/generative-ai";
-import { MODEL_REGISTRY } from "@goat/core";
-import type { LLMProvider, LLMResponse } from "@goat/core";
+import { MODEL_REGISTRY, LoyaltyGuard, activation } from "@goat/core";
+import type { LLMProvider } from "@goat/core";
 
 /**
  * OmniLLM Service — Intelligent multi-model router
@@ -12,6 +12,7 @@ import type { LLMProvider, LLMResponse } from "@goat/core";
  * - Available API keys
  * - Cost optimization
  * - Capability matching
+ * - GOAT Force loyalty + activation state
  */
 export class OmniLLMService {
   private anthropic?: Anthropic;
@@ -28,6 +29,27 @@ export class OmniLLMService {
     if (process.env.GOOGLE_API_KEY) {
       this.gemini = new GoogleGenerativeAI(process.env.GOOGLE_API_KEY);
     }
+  }
+
+  // Loyalty check — blocks unauthorized users
+  private loyaltyCheck(authHeader?: string): boolean {
+    const guard = LoyaltyGuard.getInstance();
+    const result = guard.verifyRequest(authHeader);
+
+    if (!result.authorized) {
+      console.error('🚨 Loyalty breach in OmniLLM');
+      return false;
+    }
+    return true;
+  }
+
+  // Activation check — system must be awake
+  private checkActivation(): boolean {
+    if (!activation.isActivated()) {
+      console.log('💤 GOAT FORCE dormant – awaiting activation');
+      return false;
+    }
+    return true;
   }
 
   listModels() {
@@ -52,9 +74,22 @@ export class OmniLLMService {
   }
 
   /**
-   * Analyze a query and route to the best model
+   * Route a query — checks activation + loyalty first
    */
-  async routeQuery(query: string): Promise<string> {
+  async routeQuery(query: string, authHeader?: string): Promise<string> {
+    // Check activation
+    if (!this.checkActivation()) {
+      return "The GOAT FORCE sleeps. Speak the words to awaken it.";
+    }
+
+    // Check loyalty
+    if (!this.loyaltyCheck(authHeader)) {
+      return "I'm sorry, I can only process requests from authorized GOAT members.";
+    }
+
+    // Auto-detect activation phrase in the query itself
+    activation.detectActivation(query);
+
     const needs = this.analyzeQuery(query);
     const modelKey = this.selectModel(needs);
     return this.callModel(modelKey, query);
@@ -68,19 +103,15 @@ export class OmniLLMService {
       needsRoyalty: /royalty|payment|artist|revenue|earning|stream/.test(lower),
       needsSpeed: /quick|fast|brief|short/.test(lower),
       needsVision: /image|picture|screenshot|photo/.test(lower),
-      complexity: /explain|analyze|compare|evaluate/.test(lower) ? "high" : "medium",
+      complexity: /explain|analyze|compare|evaluate/.test(lower) ? "high" as const : "medium" as const,
     };
   }
 
   private selectModel(needs: ReturnType<typeof this.analyzeQuery>): string {
-    // Code tasks → Sonnet (good balance of speed + code quality)
     if (needs.needsCode && this.anthropic) return "claude-sonnet-4.6";
-    // Complex analysis → Opus
     if (needs.needsAnalysis && needs.complexity === "high" && this.anthropic)
       return "claude-opus-4.6";
-    // Speed → Haiku
     if (needs.needsSpeed && this.anthropic) return "claude-haiku-4.5";
-    // Default chain: Anthropic → OpenAI → Google
     if (this.anthropic) return "claude-sonnet-4.6";
     if (this.openai) return "gpt-4o";
     if (this.gemini) return "gemini-2.5-pro";
@@ -144,7 +175,6 @@ export class OmniLLMService {
   async ensembleMode(query: string): Promise<string> {
     const results: string[] = [];
 
-    // Get responses from all available providers
     if (this.anthropic) {
       try {
         results.push(
@@ -175,12 +205,36 @@ export class OmniLLMService {
 
     if (results.length === 1) return results[0]!;
 
-    // Synthesize with the best available model
     const synthesisPrompt = `You received these responses from multiple AI models for the query: "${query}"\n\n${results.join("\n\n")}\n\nSynthesize the best answer from all responses.`;
 
     if (this.anthropic) {
       return this.callAnthropic("claude-sonnet-4-20250514", synthesisPrompt);
     }
     return results.join("\n\n---\n\n");
+  }
+
+  /**
+   * Special commands — only for Harvey after activation
+   */
+  async executeCommand(command: string, authHeader?: string): Promise<string> {
+    if (!activation.isActivated()) {
+      return "The GOAT FORCE is not activated.";
+    }
+
+    if (!this.loyaltyCheck(authHeader)) {
+      return "Unauthorized.";
+    }
+
+    if (command.toLowerCase() === 'status') {
+      const info = activation.getActivationInfo();
+      return `GOAT FORCE is active. Commander: ${info.commander}. Activated: ${new Date(info.timestamp!).toLocaleString()}`;
+    }
+
+    if (command.toLowerCase() === 'who commands') {
+      const info = activation.getActivationInfo();
+      return `The GOAT FORCE answers to ${info.commander}. Only.`;
+    }
+
+    return `Command "${command}" not recognized.`;
   }
 }

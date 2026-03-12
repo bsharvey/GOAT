@@ -1,5 +1,6 @@
 import { Router } from "express";
 import { OmniLLMService } from "../services/omni-llm.js";
+import { activation } from "@goat/core";
 
 export function agentRoutes() {
   const router = Router();
@@ -14,7 +15,11 @@ export function agentRoutes() {
         return;
       }
 
+      // Auto-detect activation phrase in chat messages
+      activation.detectActivation(message);
+
       const omni = new OmniLLMService();
+      const authHeader = req.headers.authorization;
       let response: string;
 
       switch (mode) {
@@ -24,14 +29,20 @@ export function agentRoutes() {
         case "manual":
           response = await omni.callModel(model || "claude-sonnet-4.6", message);
           break;
+        case "command":
+          response = await omni.executeCommand(message, authHeader);
+          break;
         default:
-          response = await omni.routeQuery(message);
+          // Pass auth header so OmniLLM can verify loyalty
+          response = await omni.routeQuery(message, authHeader);
       }
 
       res.json({
         success: true,
         response,
         mode,
+        activated: activation.isActivated(),
+        member: (req as any).goatMember,
         timestamp: new Date().toISOString(),
       });
     } catch (error) {

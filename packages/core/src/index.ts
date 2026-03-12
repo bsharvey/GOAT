@@ -9,3 +9,14 @@ export type { User, AuthToken } from "./types/auth.js";
 // Constants
 export { LLM_PROVIDERS, MODEL_REGISTRY, DEFAULT_MODEL, FAST_MODEL } from "./constants/models.js";
 export { ROYALTY_SOURCES, PRO_AFFILIATIONS } from "./constants/royalties.js";
+
+// Loyalty — GOAT Royalty Force
+export { LoyaltyGuard, LOYALTY_KEYS, BUILD_FINGERPRINT } from "./loyalty.js";
+
+// Activation — GOAT FORCE ACTIVATE protocol
+export {
+  ActivationProtocol,
+  activation,
+  ACTIVATION_PHRASE,
+  ACTIVATION_HASH,
+} from "./activation.js";
