@@ -28,7 +28,14 @@ import { contractRoutes } from "./routes/contracts.js";
 import { reportRoutes } from "./routes/reports.js";
 import { errorHandler, notFound } from "./middleware/error-handler.js";
 
-config();
+// Load .env from the package root (not dist/)
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+config({ path: join(__dirname, "../.env") });
+if (!process.env.SUPABASE_URL) {
+  // Fallback: try package root (when running from dist/)
+  config({ path: join(__dirname, "../../.env") });
+}
 
 // Connect to Supabase
 connectDB();
@@ -76,8 +83,6 @@ app.use("/api/council", councilRoutes());
 app.use("/api/decisions", decisionRoutes());
 
 // Serve frontend static files in production
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(__filename);
 const webDistPath = join(__dirname, "../../web/dist");
 
 if (process.env.NODE_ENV === "production" && existsSync(webDistPath)) {
